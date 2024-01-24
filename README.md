@@ -44,7 +44,8 @@ The first dimension table contains metadata about each site. Some but not all co
 - `climate_type`: The Koppen-Geiger classifier for the site location
 - `mount_azimuth`: azimuth angle of mount point in degrees
 - `mount_tilt`: tilt angle of mount pointing in degrees
-None of these data change.
+
+This data is static.
 
 ### Dim2: Metrics Metadata
 The second dimension table contains metadata about metrics. Each system uniquely gathers and identifies metrics (DC power, solar irradiance, module temperature, etc), and hence the metrics metadata is needed to identify metrics for each system. The columns of this table are:
@@ -53,7 +54,7 @@ The second dimension table contains metadata about metrics. Each system uniquely
 - `common_name`: a general grouping of sensor types (e.g. DC voltage, AC energy, POA irradiance)
 - `raw_units`: raw unscaled or uncalibrated units of the values produced by the sensor
 
-None of these data change.
+This data is static.
 
 `ss_id` and `metrics_id` form a primary key.
 
