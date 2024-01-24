@@ -82,3 +82,4 @@ Again, not sure. I do not have the budget to store and analyze all the data in B
 - Allow Spark to work across multiple nodes.
 - Make the pipeline robust to nulls, corrupt data and unexpected types. (we need this badly lol)
 - Better logging during task execution.
+- Create a staging area for processing the data during intermediate pipeline steps.
