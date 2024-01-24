@@ -65,10 +65,8 @@ Not really. Since this pipeline does not run on a schedule and does not have com
 ### Was Spark a good choice?
 I do not know. This was my first time using Spark and I am still understanding its use case. The power of Spark is in parallel processing across multiple nodes. Without access to a multi-node machine or the bugdet to run multiple machines in the cloud I am not truly leveraging Spark. Running Dask on my PC would have been simpler and cheaper. But I am using PySpark as a learning exercise.
 
-This pipeline will process over a terabyte of PV data. I imagine it can do that over a couple of days on my PC using Dask. However, if we had access to a multi-node computer and expected to process tons of data quickly, then having a Spark environment set up is beneficial.
-
 ### Was BigQuery a good choice?
-Again, not sure. I do not have the budget to store and analyze all the data in BigQuery. I don't have a better alternative either. I will just have to analyze this data locally using SparkSQL or Dask. I used BigQuery as a learning exercise.
+Again, not sure. Ideally I would have the budget to store and analyze all the data in BigQuery. But I don't, so I will have to analyze this data locally using SparkSQL or Dask. I used BigQuery as a learning exercise.
 
 ### I learned how to:
 - extract data from an S3 bucket using boto3
@@ -85,6 +83,7 @@ Again, not sure. I do not have the budget to store and analyze all the data in B
 - Allow Spark to work across multiple nodes.
 - Make the pipeline robust to nulls, corrupt data and unexpected types. (we need this badly lol)
 - Better logging during task execution.
+- Checkpoint which (timestamp, ss_id) pairs have been processed, so that they do not get processed twice, resulting in dupes.
 
 
 
