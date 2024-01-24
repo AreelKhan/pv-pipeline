@@ -20,7 +20,7 @@ I am working with [Open Climate Fix](https://openclimatefix.org/) on models that
 (*) see comments section below for justification about using Spark and Airflow.
 
 # Data Schema
-The data has a **star schema**. This is my first time designing my own data schema, so expect incompentency. The data is extracted from the source, processed, joined, and loaded into BigQuery. The results databse has the following schema.
+The data has a **star schema**. This is my first time designing my own data schema, so expect incompentency. The data is extracted from the source, processed, joined, and loaded into BigQuery. The resulting database has the following schema.
 
 ### Facts Table
 In the center is a facts table containing time series data. Each row contains:
@@ -41,7 +41,8 @@ The first dimension table contains metadata about each site. Some but not all co
 - `av_temp`: average ambient temperature in degrees Celsius at site
 - `climate_type`: The Koppen-Geiger classifier for the site location
 - `mount_azimuth`: azimuth angle of mount point in degrees
-- `mount_tilt`: tilt angle of mount pointing in degrees 
+- `mount_tilt`: tilt angle of mount pointing in degrees
+None of these data change.
 
 ### Dim2: Metrics Metadata
 The second dimension table contains metadata about metrics. Each system uniquely gathers and identifies metrics (DC power, solar irradiance, module temperature, etc), and hence the metrics metadata is needed to identify metrics for each system. The columns of this table are:
@@ -50,11 +51,13 @@ The second dimension table contains metadata about metrics. Each system uniquely
 - `common_name`: a general grouping of sensor types (e.g. DC voltage, AC energy, POA irradiance)
 - `raw_units`: raw unscaled or uncalibrated units of the values produced by the sensor
 
+None of these data change.
+
 `ss_id` and `metrics_id` form a primary key.
 
 # Comments
 ### Was Airflow a good choice?
-Not really. Since this pipeline does not run on a schedule and does not have complex dependencies between tasks, a simple cron job or even manual execution would suffice. However, I now have infrastructure to easily add other tasks that depend on each other. I can also easily monitor tasks statuses through the Airflow Web UI.
+Not really. Since this pipeline does not run on a schedule and does not have complex dependencies between tasks, a simple cron job or even manual execution would suffice. However, I now have infrastructure to easily add more tasks with dependencies. I can also easily monitor task statuses through the Airflow Web UI.
 
 ### Was Spark a good choice?
 I do not know. This was my first time using Spark and I am still understanding its use case. The power of Spark is in parallel processing across multiple nodes. Without access to a multi-node machine or the bugdet to run multiple machines in the cloud I am not truly leveraging Spark. Running Dask on my PC would have been simpler and cheaper. But I am using PySpark as a learning exercise.
@@ -72,3 +75,10 @@ Again, not sure. I do not have the budget to store and analyze all the data in B
 - set up an Airflow environment
 - set up a Spark session
 - write PySpark code
+
+# Next steps
+- Write a docker compose file to build this pipeline.
+- Migrate the pipeline to run in the cloud, or on WAT.ai's supercomputer, Nebula.
+- Allow Spark to work across multiple nodes.
+- Make the pipeline robust to nulls, corrupt data and unexpected types. (we need this badly lol)
+- Better logging during task execution.
