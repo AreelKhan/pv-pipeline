@@ -15,6 +15,14 @@ To expand our dataset, I am building this data pipeline that extracts historical
 The second reason to build this pipeline is to show the data acquisition team at Cohere that I have basic data pipelining skills.
 
 # How does it work?
-I intially planned on building this pipeline much later (in May) using just Dask and running it on my PC or WAT.ai's super computer cluster, but as mini-project for Cohere, I am building it now, and utilizing Airflow and PySpark on Google Cloud (a tad overengineered but good learning experience).
+
+- Pipeline runs on GCP compute engine.
+- Output data is stored on GCP storage buckets.
+- Tasks are configured and scheduled using Airflow (although a cron job or even manual execution suffices)
+- PySpark is the data processing engine*
+
+(*) the power of PySpark is in parallel processing across multiple nodes. Without the bugdet to run multiple nodes in the cloud I am not truly leveraging PySpark. Running Dask on my PC would have been simpler and cheaper.
 
 ### Data flow:
+
+I intially planned on building this pipeline much later (in May) using just Dask and running it on my PC or WAT.ai's super computer cluster, but as mini-project for Cohere, I am building it now, and utilizing Airflow and PySpark on Google Cloud (a tad overengineered but good learning experience).
