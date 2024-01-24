@@ -31,7 +31,7 @@ In the center is a facts table containing time series data. Each row contains:
 - `metric_id`: ID of metric measured
 - `value`: value of metric
 
-timestamp, system_id and metric_id form a primary key.
+`timestamp`, `system_id` and `metric_id` form a primary key.
 
 ### Dim1: System Metadata
 The first dimension table contains metadata about each site. Some but not all columns:
