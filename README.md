@@ -10,20 +10,54 @@ I am working with [Open Climate Fix](https://openclimatefix.org/) on models that
 
 - To show the data acquisition team at Cohere that I have basic data pipelining skills.
 
-# How does it work?
-- Airflow for task configuration and scheduling (although a cron job or even manual execution would suffice)
-- PySpark as the data processing engine*
-- BigQuery as the destination
+# What tools are used?
+- **Airflow** for task configuration and scheduling*
+- **Spark** as the data processing engine*
+- **BigQuery** as the destination
 
-(*) the power of PySpark is in parallel processing across multiple nodes. Without access to a multi-node machine or the bugdet to run multiple nodes in the cloud I am not truly leveraging PySpark. Running Dask on my PC would have been simpler and cheaper. But I am using PySpark as a learning exercise.
+(*) see comments section below for justification about using Spark and Airflow.
 
+# Data Schema
+The data has a **star schema**. This is my first time designing my own data schema, so expect incompentency. The data is extracted from the source, processed, joined, and loaded into BigQuery. The results databse has the following schema.
+
+### Facts Table
+In the center is a facts table containing time series data. Each row contains:
+- `timestamp`: when the data was collected
+- `ss_id`: solar system ID
+- `metric_id`: ID of metric measured
+- `value`: value of metric
+
+timestamp, system_id and metric_id form a primary key.
+
+### Dim1: System Metadata
+The first dimension table contains metadata about each site. Some but not all columns:
+- `ss_id`: solar system ID (primary key)
+- `latitude`: decimal latitude geo location
+- `longitude`: decimal longitude geo location
+- `elevation`: distance in meters above sea level, nullable
+- `av_pressure`: average annual atmospheric pressure at site in psi
+- `av_temp`: average ambient temperature in degrees Celsius at site
+- `climate_type`: The Koppen-Geiger classifier for the site location
+- `mount_azimuth`: azimuth angle of mount point in degrees
+- `mount_tilt`: tilt angle of mount pointing in degrees 
+
+### Dim2: Metrics Metadata
+The second dimension table contains metadata about metrics. Each system uniquely gathers and identifies metrics (DC power, solar irradiance, module temperature, etc), and hence the metrics metadata is needed to identify metrics for each system. The columns of this table are:
+- `ss_id`: associated solar system ID
+- `metric_id`: primary key of the metric
+- `common_name`: a general grouping of sensor types (e.g. DC voltage, AC energy, POA irradiance)
+- `raw_units`: raw unscaled or uncalibrated units of the values produced by the sensor
+
+`ss_id` and `metrics_id` form a primary key.
 
 # Comments
 ### Was Airflow a good choice?
-Not really. This pipeline does not run on a schedule and does not have complex dependencies between tasks, both things that Airflow does really well. However, I now have infrastructure to easily add other tasks that depend on each other. I can also easily monitor tasks statuses through the Airflow Web UI.
+Not really. Since this pipeline does not run on a schedule and does not have complex dependencies between tasks, a simple cron job or even manual execution would suffice. However, I now have infrastructure to easily add other tasks that depend on each other. I can also easily monitor tasks statuses through the Airflow Web UI.
 
-### Was PySpark a good choice?
-Honest answer is I am not sure. This was my first time using PySpark and I am still understanding its use case. This pipeline will process over a terabyte of PV data. I imagine it can do that over a couple of days on my PC using Dask or even Pandas. However, if we had access to a multi-node computer and expected to process tons of data quickly, then having a Spark environment set up is beneficial.
+### Was Spark a good choice?
+I do not know. This was my first time using Spark and I am still understanding its use case. The power of Spark is in parallel processing across multiple nodes. Without access to a multi-node machine or the bugdet to run multiple machines in the cloud I am not truly leveraging Spark. Running Dask on my PC would have been simpler and cheaper. But I am using PySpark as a learning exercise.
+
+This pipeline will process over a terabyte of PV data. I imagine it can do that over a couple of days on my PC using Dask. However, if we had access to a multi-node computer and expected to process tons of data quickly, then having a Spark environment set up is beneficial.
 
 ### Was BigQuery a good choice?
 Again, not sure. I do not have the budget to store and analyze all the data in BigQuery. I don't have a better alternative either. I will just have to analyze this data locally using SparkSQL or Dask. I used BigQuery as a learning exercise.
@@ -31,9 +65,8 @@ Again, not sure. I do not have the budget to store and analyze all the data in B
 ### I learned how to:
 - extract data from an S3 bucket using boto3
 - load data into BigQuery
-  - configure a BigQuery table partition
-  - design a database schema
+- configure a BigQuery table partition
+- design a database schema
 - set up an Airflow environment
-- use Spark
-  - set up a Spark session
-  - write PySpark code
+- set up a Spark session
+- write PySpark code
