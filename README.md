@@ -11,9 +11,11 @@ I am working with [Open Climate Fix](https://openclimatefix.org/) on models that
 - To show the data acquisition team at Cohere that I have basic data pipelining skills.
 
 # What tools are used?
+- **AWS S3** as the data source
 - **Airflow** for task configuration and scheduling*
 - **Spark** as the data processing engine*
-- **BigQuery** as the destination
+- **BigQuery** as the data destination
+- **Docker** to run things smoothly on my Windows PC
 
 (*) see comments section below for justification about using Spark and Airflow.
 
