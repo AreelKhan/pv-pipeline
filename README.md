@@ -82,3 +82,10 @@ Again, not sure. I do not have the budget to store and analyze all the data in B
 - Allow Spark to work across multiple nodes.
 - Make the pipeline robust to nulls, corrupt data and unexpected types. (we need this badly lol)
 - Better logging during task execution.
+
+
+
+### Sources:
+I copied plenty of code and text form the following sources:
+- [Setting up Airflow with Docker on Windows.](https://medium.com/@garc1a0scar/how-to-start-with-apache-airflow-in-docker-windows-902674ad1bbe)
+- [openEDI data documentation](https://github.com/openEDI/documentation/blob/main/pvdaq.md)
