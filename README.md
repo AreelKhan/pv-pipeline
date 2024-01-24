@@ -15,6 +15,6 @@ To expand our dataset, I am building this data pipeline that extracts historical
 The second reason to build this pipeline is to show the data acquisition team at Cohere that I have basic data pipelining skills.
 
 # How does it work?
-I intially planned on building this pipeline much later (in May) using just Dask and running it on my PC or WAT.ai's super computer cluster, but as mini-project for Cohere, I am building it now, and utilizing Airflow and PySpark on Google Cloud (a tad overengineered in my opinon).
+I intially planned on building this pipeline much later (in May) using just Dask and running it on my PC or WAT.ai's super computer cluster, but as mini-project for Cohere, I am building it now, and utilizing Airflow and PySpark on Google Cloud (a tad overengineered but good learning experience).
 
-Data flow:
+### Data flow:
