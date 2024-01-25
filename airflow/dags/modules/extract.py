@@ -101,7 +101,7 @@ class PVExtract:
             makedirs(local_dir, exist_ok=True)
             self.s3_download(pv_data_key, path.join(local_dir, f"pv_data_system{ss_id}_{date.strftime('%Y-%m-%d')}.parquet"))
         except Exception as error:
-            self.logger.error(f"Error while extracting PV data for Site {ss_id} on {date}: \n {error}")
+            self.logger.error(f"Error while extracting PV data for Site {ss_id} on {date}: \n{error}")
 
 
     def extract(self, ss_id: int, start_date: datetime, end_date: datetime) -> None:
@@ -123,5 +123,5 @@ class PVExtract:
         
         # extract pv
         self.logger.info(f"Extracting PV data for System {ss_id} for dates: {start_date} to {end_date}")
-        for date in tqdm(pd.date_range(start=start_date, end=end_date)):
+        for date in pd.date_range(start=start_date, end=end_date):
             self.extract_pv_data(ss_id, date)
