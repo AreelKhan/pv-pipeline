@@ -1,2 +1,5 @@
 secrets.json
 data/
+airflow/logs/
+airflow/plugins/
+__pycache__
