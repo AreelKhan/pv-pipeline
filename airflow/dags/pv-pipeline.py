@@ -29,7 +29,7 @@ dag = DAG(
 
 def extract_pv(**kwargs):
     log = logging.getLogger(__name__)
-
+    
     dag_run_conf = kwargs["dag_run"].conf
     ss_id: int = int(dag_run_conf.get("ss_id"))
     start_date: datetime = datetime.strptime(dag_run_conf.get("start_date"), "%Y/%m/%d")
@@ -38,7 +38,7 @@ def extract_pv(**kwargs):
     aws_access_key_id: str = str(dag_run_conf.get("aws_access_key_id"))
     aws_secret_access_key: str = str(dag_run_conf.get("aws_secret_access_key"))
     region_name: str = str(dag_run_conf.get("region_name"))
-    log.info(os.getcwd())
+
     extractor = PVExtract(
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,
