@@ -1,11 +1,16 @@
 from pyspark.sql import SparkSession
 
-spark = SparkSession.builder.appName("experiment").getOrCreate()
+# Create a Spark session
+spark = SparkSession.builder.appName("PV-merge-test").getOrCreate()
 
-# Read data from the mounted directory
-data = spark.read.parquet("/opt/bitnami/spark/staging_area/system_10/metrics_system10.parquet")
+# Define the column names
+pv_cols = ["measured_on", "metric_id", "value"]
 
-# Perform your data processing here
+# Read parquet files into a DataFrame
+pv_data = spark.read.parquet('staging_area/system_1349/pv_data/pv_data_system1349_2013-05-01.parquet').select(pv_cols)
 
-# Write the processed data back to the mounted directory
-data.write.csv("/opt/bitnami/spark/staging_area/system_10/processed_metrics_system10.parquet")
+# Show the DataFrame
+pv_data.show()
+
+# Stop the Spark session
+spark.stop()
