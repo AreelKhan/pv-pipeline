@@ -62,15 +62,16 @@ Not really. Since this pipeline does not run on a schedule and does not have com
 I do not know. This was my first time using Spark and I am still understanding its use case. The power of Spark is in parallel processing across multiple nodes. Without access to a multi-node machine or the bugdet to run multiple machines in the cloud I am not truly leveraging Spark. Running Dask on my PC would have been simpler and cheaper. But I am using PySpark as a learning exercise.
 
 ### Was BigQuery a good choice?
-Again, not sure. Ideally I would have the budget to store and analyze all the data in BigQuery. But I don't, so I will have to analyze this data locally using SparkSQL or Dask. I used BigQuery as a learning exercise.
+Again, not sure. Our use case for a database is for analytics, and the data is around 500 GB, so BQ seemed approriate. Ideally I would have the budget to store and analyze the full dataset. But I don't. I will have to analyze this data locally using SparkSQL or Dask. I used BigQuery as a learning exercise.
 
 ### I learned how to:
 - extract data from an S3 bucket using boto3
-- load data into BigQuery
+- load data into BigQuery table using Python API
 - configure BigQuery service account
 - configure a BigQuery table partition
 - design a database schema
 - set up an Airflow environment
+- debug Airflow dags in more depth
 - set up a Spark session
 - integrate Spark with Airflow
 - write PySpark code
@@ -80,12 +81,10 @@ Again, not sure. Ideally I would have the budget to store and analyze all the da
 - Write a docker compose file to build this pipeline.
 - Migrate the pipeline to run in the cloud, or on WAT.ai's supercomputer, Nebula.
 - Allow Spark to work across multiple nodes.
-- Make the pipeline robust to nulls, corrupt data and unexpected types. (we need this badly lol)
+- Make the pipeline more idempotent. Some operations are breaking after being run once.
 - Better logging during task execution.
 - Create a staging area for processing the data during intermediate pipeline steps.
 - Checkpoint which (timestamp, ss_id) pairs have been processed, so that they do not get processed twice, resulting in dupes.
-
-
 
 ### Sources:
 I copied plenty of code and text form the following sources:
