@@ -69,7 +69,7 @@ class MetadataLoad(BaseLoader):
 
     def load(self):
         table_schema = [
-            bigquery.SchemaField(name="ss_id", field_type="INTEGER", mode="NULLABLE"),
+            bigquery.SchemaField("ss_id", "INTEGER", "NULLABLE"),
             bigquery.SchemaField("latitude", "FLOAT"),
             bigquery.SchemaField("longitude", "FLOAT"),
             bigquery.SchemaField("elevation", "FLOAT"),
@@ -88,5 +88,6 @@ class MetadataLoad(BaseLoader):
             )
         except Exception as error:
             self.logger.error(f"Error while loading metadata into BigQuery: \n{error}")
+            raise error
 
         return None

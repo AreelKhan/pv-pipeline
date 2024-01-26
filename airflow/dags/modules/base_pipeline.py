@@ -85,6 +85,8 @@ class BaseLoader:
 
         job_config = bigquery.LoadJobConfig()
         job_config.source_format = bigquery.SourceFormat.PARQUET
+        job_config.write_disposition = "WRITE_APPEND"
+        job_config.schema_update_options = ['ALLOW_FIELD_ADDITION', 'ALLOW_FIELD_RELAXATION']
 
         with open(source_data_path, "rb") as source_file:
             job = self.client.load_table_from_file(source_file, table_ref, job_config=job_config)

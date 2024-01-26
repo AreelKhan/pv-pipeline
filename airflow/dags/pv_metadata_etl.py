@@ -12,8 +12,7 @@ from os import path
 default_args = {
     'owner': 'Areel',
     'start_date': datetime(2023, 12, 12),
-    'retries': 1, # TODO remove
-    'retry_delay': timedelta(minutes=5), # TODO remove
+    'retries': 0
 }
 
 dag = DAG(
