@@ -1,10 +1,15 @@
-from os import path, makedirs, remove
-from shutil import rmtree
-from logging import Logger
-from google.cloud import bigquery
-import pandas as pd
+import glob
 from datetime import datetime
-from base_pipeline import BaseExtractor, BaseLoader, BUCKET_NAME, METRICS_PREFIX, PV_PREFIX
+from logging import Logger
+from os import makedirs, path, remove
+from shutil import rmtree
+
+import pandas as pd
+from base_pipeline import (BUCKET_NAME, METRICS_PREFIX, PV_PREFIX,
+                           BaseExtractor, BaseLoader)
+from google.cloud import bigquery
+from pyspark.sql import SparkSession, functions
+
 
 class PVExtract(BaseExtractor):
 
@@ -35,7 +40,7 @@ class PVExtract(BaseExtractor):
             makedirs(local_dir, exist_ok=True)
             self.s3_download(pv_data_key, path.join(local_dir, f"pv_data_system{ss_id}_{date.strftime('%Y-%m-%d')}.parquet"))
         except Exception as error:
-            self.logger.error(f"Error while extracting PV data for Site {ss_id} on {date}: \n{error}")
+            self.logger.error(f"Error while extracting PV data for Site {ss_id} on {date}: /n{error}")
 
 
     def extract(self, ss_id: int, start_date: datetime, end_date: datetime) -> None:
@@ -52,7 +57,6 @@ class PVExtract(BaseExtractor):
             self.extract_pv_data(ss_id, date)
 
 
-
 class PVTransform:
 
     def __init__(self, staging_area: str, logger: Logger):
@@ -64,14 +68,18 @@ class PVTransform:
             Transforms all the data present in the staging area for ss_id
         """
         try:
-            self.logger.info(f"Transforming PV data for System {ss_id}...")
-            
+            self.logger.info(f"Transforming PV data for System {ss_id}...") 
+            spark = SparkSession.builder.appName(f"PV_system{ss_id}_transform").getOrCreate()
+
             metrics_cols = ["system_id", "metric_id", "sensor_name", "raw_units"]
-            metrics = pd.read_parquet(path.join(self.staging_area, f"system{ss_id}", f"metrics_system{ss_id}.parquet"), columns=metrics_cols)
-            metrics = metrics[metrics["sensor_name"].isin(["dc_power", "ac_power", "poa_irradiance"])]
+            metrics_data = spark.read.parquet(path.join(self.staging_area, f"system{ss_id}", f"metrics_system{ss_id}.parquet")).select(metrics_cols)
+            filtered_metrics = metrics_data.filter(functions.col("sensor_name").isin(["dc_power", "ac_power", "poa_irradiance"]))
 
             pv_cols = ["measured_on", "metric_id", "value"]
-            pv_data = pd.read_parquet(path.join(self.staging_area, f"system{ss_id}", "pv_data", f"pv_data_system{ss_id}_2010-03-09.parquet"), columns=pv_cols)
+            pv_data = spark.read.parquet(path.join(self.staging_area, f"system{ss_id}", "pv_data", "*")).select(pv_cols)
+
+            join_condition = pv_data["metric_id"] == filtered_metrics["metric_id"]
+            merged = pv_data.join(filtered_metrics, join_condition, "inner")
 
             renames = {
                     "system_id":"ss_id",
@@ -79,48 +87,50 @@ class PVTransform:
                     "sensor_name":"sensor",
                     "raw_units":"units"
                 }
-            merged = pd.merge(pv_data, metrics, "inner", "metric_id")
-            merged = merged.rename(renames, axis=1)
-            merged = merged[["ss_id", "units", "timestamp", "value", "sensor"]]
-            merged = merged.replace("", pd.NA)
+            for old_name, new_name in renames.items():
+                merged = merged.withColumnRenamed(old_name, new_name)
 
-            for col in merged.columns:
-                if col not in ["sensor", "units", "timestamp"]:
-                    merged[col] = pd.to_numeric(merged[col], "coerce")
+            selected_cols = ["ss_id", "timestamp", "sensor", "units", "value"]
+            merged = merged.select(selected_cols)
+            merged = merged.replace("", None)
 
-            merged.to_parquet(path.join(self.staging_area, "system10", "pv_data_merged.parquet"))
+            merged.write.parquet(path.join(self.staging_area, f"system{ss_id}", "pv_data_merged.parquet"))
+
+            spark.stop()
+
             rmtree(path.join(self.staging_area, f"system{ss_id}", "pv_data/"))
             remove(path.join(self.staging_area, f"system{ss_id}", f"metrics_system{ss_id}.parquet"))
-
+                   
         except Exception as error:
-            self.logger.error(f"Error while transforming metadata: \n{error}")
+            self.logger.error(f"Error while transforming PV data for system {ss_id}: \n{error}")
+
 
         return None
     
 
-class MetadataLoad(BaseLoader):
+class PVLoad(BaseLoader):
 
-    def load(self):
+    def load(self, ss_id: int):
         table_schema = [
             bigquery.SchemaField("ss_id", "INTEGER", "NULLABLE"),
-            bigquery.SchemaField("latitude", "FLOAT"),
-            bigquery.SchemaField("longitude", "FLOAT"),
-            bigquery.SchemaField("elevation", "FLOAT"),
-            bigquery.SchemaField("av_pressure", "FLOAT"),
-            bigquery.SchemaField("av_temp", "FLOAT"),
-            bigquery.SchemaField("climate_type", "STRING"),
-            bigquery.SchemaField("mount_azimuth", "FLOAT"),
-            bigquery.SchemaField("mount_tilt", "FLOAT")
+            bigquery.SchemaField("timetsamp", "DATETIME"),
+            bigquery.SchemaField("sensor", "STRING"),
+            bigquery.SchemaField("units", "STRING"),
+            bigquery.SchemaField("value", "FLOAT"),
             ]
-        try:
-            self.load_to_bq(
-                dataset_id="pv_oedi",
-                table_id="pv_metadata",
-                table_schema=table_schema,
-                source_data_path=path.join(self.staging_area, "metadata.parquet")
-            )
-        except Exception as error:
-            self.logger.error(f"Error while loading metadata into BigQuery: \n{error}")
-            raise error
+        parquet_files = glob.glob(path.join(self.staging_area, f"system{ss_id}", "pv_data_merged.parquet", "*.parquet"))
+        self.logger.info(f"Uploading PV data for system {ss_id}")
+        for file in parquet_files:
+            try:
+                self.load_to_bq(
+                    dataset_id="pv_oedi",
+                    table_id="pv_data",
+                    table_schema=table_schema,
+                    source_data_path=file
+                )
+                
+            except Exception as error:
+                self.logger.error(f"Error while loading PV data from {file} into BigQuery: \n{error}")
+                raise error
 
         return None
