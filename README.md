@@ -59,7 +59,7 @@ This data is static.
 
 # Comments
 ### Was Airflow a good choice?
-Not really. Since this pipeline does not run on a schedule and does not have complex dependencies between tasks, a simple cron job or even manual execution would suffice. However, I now have infrastructure to easily add more tasks with dependencies. I can also easily monitor task statuses through the Airflow Web UI.
+Not really. Since this pipeline does not run on a schedule and does not have complex dependencies between tasks, manual execution would suffice. However, I now have infrastructure to easily add more tasks with dependencies. I can also easily monitor task statuses through the Airflow Web UI. It was also fun using Airflow.
 
 ### Was Spark a good choice?
 I do not know. This was my first time using Spark and I am still understanding its use case. The power of Spark is in parallel processing across multiple nodes. Without access to a multi-node machine or the bugdet to run multiple machines in the cloud I am not truly leveraging Spark. Running Dask on my PC would have been simpler and cheaper. But I am using PySpark as a learning exercise.
