@@ -44,11 +44,11 @@ def extract_metadata(**kwargs):
     return None
 
 def transform_metadata(**kwargs):
-    pass
+    return None
 
 
 def load_metadata(**kwargs):
-    pass
+    return None
 
 
 extract_task = PythonOperator(

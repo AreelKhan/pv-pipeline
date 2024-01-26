@@ -36,28 +36,3 @@ class MetadataExtract(BasePipeline):
         if not path.isfile(path.join(self.staging_area, "metadata.parquet")):
             self.logger.info("Metadata is not available. Extracting from source...")
             self.extract_metadata()
-
-
-secrets = {
-    "ss_id": 10,
-    "start_date":"2010/03/01",
-    "end_date":"2010/03/03",
-    "staging_area":"staging_area",
-    "aws_access_key_id":"AKIA4MTWG33OOIEEML5D",
-    "aws_secret_access_key":"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",
-    "region_name":"us-west-2"
-}
-
-import logging
-log = logging.getLogger(__name__)
-
-extractor = MetadataExtract(
-    aws_access_key_id="AKIA4MTWG33OOIEEML5D",
-    aws_secret_access_key="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",
-    region_name="us-west-2",
-    staging_area="staging_area",
-    logger=log
-)
-
-
-extractor.extract()
