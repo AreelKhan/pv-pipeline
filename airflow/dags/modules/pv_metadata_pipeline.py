@@ -54,9 +54,9 @@ class MetadataTransform():
             merged = merged.replace("", pd.NA)
             for col in merged.columns:
                 if col != "climate_type":
-                    merged[col] = pd.to_numeric(merged[col])
+                    merged[col] = pd.to_numeric(merged[col], "coerce")
 
-            merged.to_parquet(path.join(self.staging_area, "metadata.parquet"))            
+            merged.to_parquet(path.join(self.staging_area, "metadata.parquet"))
             remove(path.join(self.staging_area, "site.parquet"))
             remove(path.join(self.staging_area, "mount.parquet"))
 
