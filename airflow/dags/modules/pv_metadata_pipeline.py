@@ -37,6 +37,7 @@ class MetadataTransform:
         self.staging_area = staging_area
         self.logger = logger
 
+
     def transform(self):
         try:
             self.logger.info("Transforming metadata...")
