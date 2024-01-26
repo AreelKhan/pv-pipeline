@@ -1,8 +1,9 @@
 secrets.json
+bq_service_account_key.json
 data/
+secrets/
 airflow/logs/
 airflow/plugins/
-__pycache__
 assets/
-bq_service_account_key.json
 staging_area/
+__pycache__
