@@ -1,6 +1,5 @@
 import boto3
 from os import path, makedirs
-import json
 from datetime import datetime
 from logging import Logger
 import pandas as pd
@@ -42,6 +41,7 @@ class PVExtract:
         self.staging_area = staging_area
         self.logger = logger
 
+
     def s3_download(self, key: str, filename: str):
         """
             Given an AWS S3 file key, downloads it.
@@ -50,11 +50,27 @@ class PVExtract:
         """
         self.s3.download_file(BUCKET_NAME, key, filename)
 
+
     def extract_metadata(self) -> None:
         """
             Extracts PV system metadata
         """
-        pass
+        site_object = self.s3.list_objects(Bucket=BUCKET_NAME, Prefix=SITE_PREFIX, Delimiter="/")
+        makedirs(self.staging_area, exist_ok=True)
+
+        try:
+            site_key = site_object["Contents"][0]["Key"]
+            self.s3_download(site_key, path.join(self.staging_area, f"metadata.parquet"))
+        except Exception as error:
+            self.logger.error(f"Error while extracting metadata: \n{error}")
+
+        mount_object = self.s3.list_objects(Bucket=BUCKET_NAME, Prefix=MOUNT_PREFIX, Delimiter="/")
+        try:
+            mount_key = mount_object["Contents"][0]["Key"]
+            self.s3_download(mount_key, path.join(self.staging_area, f"mount.parquet"))
+        except Exception as error:
+            self.logger.error(f"Error while extracting mount data: \n{error}")
+
 
     def extract_metrics(self, ss_id: int) -> None:
         """
@@ -67,8 +83,9 @@ class PVExtract:
             local_dir = path.join(self.staging_area, f"system_{ss_id}")
             makedirs(local_dir, exist_ok=True)
             self.s3_download(metrics_key, path.join(local_dir, f"metrics_system{ss_id}.parquet"))
-        except:
-            self.logger.error(f"Metrics for system: {ss_id} were not found. Aborting extraction.")
+        except Exception as error:
+            self.logger.error(f"Error while extracting metrics for Site {ss_id}: \n{error}")
+
 
     def extract_pv_data(self, ss_id: int, date: datetime) -> None:
         """
@@ -81,8 +98,9 @@ class PVExtract:
             local_dir = path.join(self.staging_area, f"system_{ss_id}", "pv_data")
             makedirs(local_dir, exist_ok=True)
             self.s3_download(pv_data_key, path.join(local_dir, f"pv_data_system{ss_id}_{date.strftime('%Y-%m-%d')}.parquet"))
-        except:
-            self.logger.error(f"PV data for System: {ss_id} on {date} was not found. Aborting extraction.")
+        except Exception as error:
+            self.logger.error(f"Error while extracting PV data for Site {ss_id} on {date}: \n{error}")
+
 
     def extract(self, ss_id: int, start_date: datetime, end_date: datetime) -> None:
         """
@@ -105,4 +123,3 @@ class PVExtract:
         self.logger.info(f"Extracting PV data for System {ss_id} for dates: {start_date} to {end_date}")
         for date in pd.date_range(start=start_date, end=end_date):
             self.extract_pv_data(ss_id, date)
-
