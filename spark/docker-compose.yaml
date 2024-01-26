@@ -7,7 +7,7 @@ services:
     environment:
       - SPARK_MODE=master
     ports:
-      - "8080:8080"
+      - "8081:8080"
       - "7077:7077"
     volumes:
       - ./staging_area:/opt/bitnami/spark/staging_area
@@ -20,8 +20,6 @@ services:
       - SPARK_MASTER_URL=spark://spark-master:7077
     depends_on:
       - spark-master
-    volumes:
-      - ./staging_area:/opt/bitnami/spark/staging_area
   # You can add more worker nodes if needed
   # spark-worker-2:
   #   image: bitnami/spark:latest

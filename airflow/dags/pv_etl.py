@@ -2,8 +2,8 @@ import sys
 sys.path.append('/opt/airflow/dags/modules/') # hacky solution to import my ETL code
 
 import logging
-from pv_metadata_pipeline import MetadataExtract, MetadataTransform, MetadataLoad
-from datetime import datetime, timedelta
+from pv_pipeline import PVExtract, PVTransform, PVLoad
+from datetime import datetime
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from os import path
@@ -26,29 +26,33 @@ dag = DAG(
 
 def extract_pv(**kwargs):
     dag_run_conf = kwargs["dag_run"].conf
-    extractor = MetadataExtract(
+    extractor = PVExtract(
         aws_access_key_id=str(dag_run_conf.get("aws_access_key_id")),
         aws_secret_access_key=str(dag_run_conf.get("aws_secret_access_key")),
         region_name=str(dag_run_conf.get("region_name")),
         staging_area=str(dag_run_conf.get("staging_area")),
         logger=logging.getLogger(__name__)
     )
-    extractor.extract()
+    extractor.extract(
+        ss_id=int(dag_run_conf.get("ss_id")),
+        start_date=datetime.strptime(dag_run_conf.get("start_date"), "%Y/%m/%d"),
+        end_date=datetime.strptime(dag_run_conf.get("end_date"), "%Y/%m/%d")
+    )
     return None
 
-def transform_metadata(**kwargs):
+def transform_pv(**kwargs):
     dag_run_conf = kwargs["dag_run"].conf
-    transformer = MetadataTransform(
+    transformer = PVTransform(
         staging_area=str(dag_run_conf.get("staging_area")),
         logger=logging.getLogger(__name__)
     )
-    transformer.transform()
+    transformer.transform(int(dag_run_conf.get("ss_id")))
     return None
 
-def load_metadata(**kwargs):
+def load_pv(**kwargs):
     dag_run_conf = kwargs["dag_run"].conf
     staging_area = str(dag_run_conf.get("staging_area"))
-    loader = MetadataLoad(
+    loader = PVLoad(
         project_id=str(dag_run_conf.get("bq_project_id")),
         credentials_path=path.join("dags", "modules", str(dag_run_conf.get("credentials_path"))),
         staging_area=staging_area,
@@ -59,21 +63,21 @@ def load_metadata(**kwargs):
 
 extract_task = PythonOperator(
     task_id='extract_metadata',
-    python_callable=extract_metadata,
+    python_callable=extract_pv,
     provide_context=True,
     dag=dag,
 )
 
 transform_task = PythonOperator(
     task_id='transform_metadata',
-    python_callable=transform_metadata,
+    python_callable=transform_pv,
     provide_context=True,
     dag=dag,
 )
 
 load_task = PythonOperator(
     task_id='load_metadata',
-    python_callable=load_metadata,
+    python_callable=load_pv,
     provide_context=True,
     dag=dag,
 )
