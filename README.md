@@ -70,11 +70,14 @@ Again, not sure. Ideally I would have the budget to store and analyze all the da
 ### I learned how to:
 - extract data from an S3 bucket using boto3
 - load data into BigQuery
+- configure BigQuery service account
 - configure a BigQuery table partition
 - design a database schema
 - set up an Airflow environment
 - set up a Spark session
+- integrate Spark with Airflow
 - write PySpark code
+- write my own docker-compose file
 
 # Next steps
 - Write a docker compose file to build this pipeline.
