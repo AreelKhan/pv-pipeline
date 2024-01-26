@@ -2,10 +2,11 @@ import sys
 sys.path.append('/opt/airflow/dags/modules/') # hacky solution to import my ETL code
 
 import logging
-from pv_metadata_pipeline import MetadataExtract, MetadataTransform
+from pv_metadata_pipeline import MetadataExtract, MetadataTransform, MetadataLoad
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
+from os import path
 
 
 default_args = {
@@ -45,8 +46,16 @@ def transform_metadata(**kwargs):
     transformer.transform()
     return None
 
-
 def load_metadata(**kwargs):
+    dag_run_conf = kwargs["dag_run"].conf
+    staging_area = str(dag_run_conf.get("staging_area"))
+    loader = MetadataLoad(
+        project_id=str(dag_run_conf.get("bq_project_id")),
+        credentials_path=path.join(staging_area, str(dag_run_conf.get("credentials_path"))),
+        staging_area=staging_area,
+        logger=logging.getLogger(__name__)
+        )
+    loader.load()
     return None
 
 
