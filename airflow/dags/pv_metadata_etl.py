@@ -51,13 +51,12 @@ def load_metadata(**kwargs):
     staging_area = str(dag_run_conf.get("staging_area"))
     loader = MetadataLoad(
         project_id=str(dag_run_conf.get("bq_project_id")),
-        credentials_path=path.join(staging_area, str(dag_run_conf.get("credentials_path"))),
+        credentials_path=path.join("dags", "modules", str(dag_run_conf.get("credentials_path"))),
         staging_area=staging_area,
         logger=logging.getLogger(__name__)
         )
     loader.load()
     return None
-
 
 extract_task = PythonOperator(
     task_id='extract_pv',

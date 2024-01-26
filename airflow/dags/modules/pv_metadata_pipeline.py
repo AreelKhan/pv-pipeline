@@ -1,13 +1,11 @@
 from os import path, makedirs, remove
 from logging import Logger
 from google.cloud import bigquery
-from google.oauth2 import service_account
 import pandas as pd
-from typing import List
 
-from base_pipeline import BasePipeline, BUCKET_NAME, SITE_PREFIX, MOUNT_PREFIX
+from base_pipeline import BaseExtractor, BaseLoader, BUCKET_NAME, SITE_PREFIX, MOUNT_PREFIX
 
-class MetadataExtract(BasePipeline):
+class MetadataExtract(BaseExtractor):
 
     def extract(self) -> None:
         """
@@ -33,7 +31,7 @@ class MetadataExtract(BasePipeline):
         return None
 
 
-class MetadataTransform():
+class MetadataTransform:
 
     def __init__(self, staging_area: str, logger: Logger):
         self.staging_area = staging_area
@@ -55,7 +53,8 @@ class MetadataTransform():
             for col in merged.columns:
                 if col != "climate_type":
                     merged[col] = pd.to_numeric(merged[col], "coerce")
-
+            self.logger.info(merged.head())
+            self.logger.info(merged.info())
             merged.to_parquet(path.join(self.staging_area, "metadata.parquet"))
             remove(path.join(self.staging_area, "site.parquet"))
             remove(path.join(self.staging_area, "mount.parquet"))
@@ -66,45 +65,7 @@ class MetadataTransform():
         return None
     
 
-class MetadataLoad:
-     
-    def __init__(
-            self,
-            project_id: str,
-            credentials_path: str,
-            staging_area: str,
-            logger: Logger,
-            ):
-        self.project_id = project_id
-        self.credentials = service_account.Credentials.from_service_account_file(credentials_path)
-        self.client = bigquery.Client(project=project_id, credentials=self.credentials)
-        self.staging_area = staging_area
-        self.logger = logger
-
-    def load_to_bq(
-            self,
-            dataset_id: str,
-            table_id: str,
-            table_schema: List[bigquery.SchemaField],
-            source_data_path: str,
-            ):
-        table_ref = self.client.dataset(dataset_id).table(table_id)
-        table = bigquery.Table(table_ref, schema=table_schema)
-
-        try:
-            self.client.get_table(table)
-        except Exception:
-            self.logger.info(f"Table {table} is not found. Creating...")
-            self.client.create_table(table)
-
-        job_config = bigquery.LoadJobConfig()
-        job_config.source_format = bigquery.SourceFormat.PARQUET
-
-        with open(source_data_path, "rb") as source_file:
-            job = self.client.load_table_from_file(source_file, table_ref, job_config=job_config)
-        job.result()
-
-        return None
+class MetadataLoad(BaseLoader):
 
     def load(self):
         table_schema = [
