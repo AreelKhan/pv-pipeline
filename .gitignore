@@ -5,4 +5,5 @@ airflow/logs/
 airflow/plugins/
 assets/
 staging_area/
+logs/
 __pycache__
