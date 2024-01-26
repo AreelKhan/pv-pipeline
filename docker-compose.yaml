@@ -48,7 +48,7 @@ services:
       - POSTGRES_PASSWORD=airflow
       - POSTGRES_DB=airflow
     networks:
-      - code-with-yu
+      - areel-khan
 
   webserver:
     <<: *airflow-common
@@ -60,7 +60,7 @@ services:
 
   scheduler:
     <<: *airflow-common
-    command: bash -c "airflow db migrate && airflow users create --username admin --firstname Yusuf --lastname Ganiyu --role Admin --email airscholar@gmail.com --password admin && airflow scheduler"
+    command: bash -c "airflow db migrate && airflow users create --username admin --firstname Areel --lastname Khan --role Admin --email areel.khan.career@gmail.com --password password && airflow scheduler"
 
 networks:
   code-with-yu:
