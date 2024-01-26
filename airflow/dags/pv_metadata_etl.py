@@ -58,21 +58,21 @@ def load_metadata(**kwargs):
     return None
 
 extract_task = PythonOperator(
-    task_id='extract_pv',
+    task_id='extract_metadata',
     python_callable=extract_metadata,
     provide_context=True,
     dag=dag,
 )
 
 transform_task = PythonOperator(
-    task_id='transform_pv',
+    task_id='transform_metadata',
     python_callable=transform_metadata,
     provide_context=True,
     dag=dag,
 )
 
 load_task = PythonOperator(
-    task_id='load_pv',
+    task_id='load_metadata',
     python_callable=load_metadata,
     provide_context=True,
     dag=dag,
