@@ -1,10 +1,8 @@
 import boto3
 from os import path, makedirs
-import json
 from datetime import datetime
 from logging import Logger
 import pandas as pd
-from tqdm import tqdm
 
 # S3 bucket and paths
 BUCKET_NAME = "oedi-data-lake"
