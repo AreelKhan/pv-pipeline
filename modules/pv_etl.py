@@ -156,7 +156,7 @@ class PVLoad(BaseLoader):
     def load(self, ss_id: int):
         table_schema = [
             bigquery.SchemaField("ss_id", "INTEGER", "NULLABLE"),
-            bigquery.SchemaField("timetsamp", "DATETIME"),
+            bigquery.SchemaField("timestamp", "DATETIME"),
             bigquery.SchemaField("sensor", "STRING"),
             bigquery.SchemaField("units", "STRING"),
             bigquery.SchemaField("value", "FLOAT"),
