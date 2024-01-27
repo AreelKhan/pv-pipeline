@@ -5,6 +5,7 @@ import pandas as pd
 
 from base_pipeline import BaseExtractor, BaseLoader, BUCKET_NAME, SITE_PREFIX, MOUNT_PREFIX
 
+
 class MetadataExtract(BaseExtractor):
 
     def extract(self) -> None:
