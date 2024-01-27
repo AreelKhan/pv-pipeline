@@ -3,7 +3,8 @@ from logging import Logger
 from google.cloud import bigquery
 import pandas as pd
 
-from base_pipeline import BaseExtractor, BaseLoader, BUCKET_NAME, SITE_PREFIX, MOUNT_PREFIX
+from base_classes import BaseExtractor, BaseLoader, BUCKET_NAME, SITE_PREFIX, MOUNT_PREFIX
+
 
 class MetadataExtract(BaseExtractor):
 
