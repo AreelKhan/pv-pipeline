@@ -6,7 +6,6 @@ from pv_etl import PVExtract, PVDaskTransform, PVLoad
 from datetime import datetime
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
-from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from os import path
 
 
@@ -19,16 +18,16 @@ default_args = {
 dag = DAG(
     'pv-dask-pipeline',
     default_args=default_args,
-    description='A DAG to extract PV data from Parquet files in S3, transform with PySpark, and load into BigQuery',
+    description='A DAG to extract PV data from Parquet files in S3, transform with Dask, and load into BigQuery',
     schedule_interval=None,  # does not run on schedule
     is_paused_upon_creation=False,
-    params={
+    params={ # default args
         "ss_id": 10,
         "start_date":"2010/03/01",
         "end_date":"2010/03/02",
         "staging_area":"staging_area",
         "aws_access_key_id":"AKIA4MTWG33OOIEEML5D",
-        "aws_secret_access_key":"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",
+        "aws_secret_access_key":"its a secret!",
         "region_name":"us-west-2",
         "bq_project_id":"cohere-pv-pipeline",
         "credentials_path":"bq_service_account_key.json"
@@ -72,7 +71,6 @@ def load_pv(**kwargs):
         )
     loader.load(ss_id=int(dag_run_conf.get("ss_id")))
     return None
-
 
 
 extract_task = PythonOperator(

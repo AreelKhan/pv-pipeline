@@ -23,7 +23,7 @@ dag = DAG(
     is_paused_upon_creation=False,
     params={
         "aws_access_key_id":"AKIA4MTWG33OOIEEML5D",
-        "aws_secret_access_key":"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",
+        "aws_secret_access_key":"its a secret!",
         "region_name":"us-west-2",
         "staging_area":"staging_area",
         "bq_project_id":"cohere-pv-pipeline",
