@@ -23,8 +23,20 @@ dag = DAG(
     default_args=default_args,
     description='A DAG to extract PV data from Parquet files in S3, transform with PySpark, and load into BigQuery',
     schedule_interval=None,  # does not run on schedule
-    is_paused_upon_creation=False
-)
+    is_paused_upon_creation=False,
+    params={
+        "ss_id": 10,
+        "start_date":"2010/03/01",
+        "end_date":"2010/03/30",
+        "staging_area":"staging_area",
+        "aws_access_key_id":"AKIA4MTWG33OOIEEML5D",
+        "aws_secret_access_key":"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",
+        "region_name":"us-west-2",
+        "bq_project_id":"cohere-pv-pipeline",
+        "credentials_path":"bq_service_account_key.json"
+        }
+    )
+
 
 
 def extract_pv(**kwargs):
