@@ -2,7 +2,7 @@ import sys
 sys.path.append('/opt/airflow/dags/modules/') # hacky solution to import my ETL code
 
 import logging
-from pv_pipeline import PVExtract, PVTransform, PVLoad
+from pv_etl import PVExtract, PVLoad
 from datetime import datetime
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
