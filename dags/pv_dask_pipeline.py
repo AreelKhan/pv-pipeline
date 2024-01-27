@@ -1,8 +1,8 @@
 import sys
-sys.path.append('/opt/airflow/dags/modules/') # hacky solution to import my ETL code
+sys.path.append('/opt/airflow/modules/') # hacky solution to import my ETL code
 
 import logging
-from pv_etl import PVExtract, PVLoad
+from pv_etl import PVExtract, PVDaskTransform, PVLoad
 from datetime import datetime
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
@@ -17,7 +17,7 @@ default_args = {
 }
 
 dag = DAG(
-    'pv-pipeline',
+    'pv-spark-pipeline',
     default_args=default_args,
     description='A DAG to extract PV data from Parquet files in S3, transform with PySpark, and load into BigQuery',
     schedule_interval=None,  # does not run on schedule
@@ -41,6 +41,14 @@ def extract_pv(**kwargs):
     )
     return None
 
+def dask_transform_pv(**kwargs):
+    dag_run_conf = kwargs["dag_run"].conf
+    transformer = PVDaskTransform(
+        staging_area=str(dag_run_conf.get("staging_area")),
+        logger=logging.getLogger(__name__)
+    )
+    transformer.transform(ss_id=int(dag_run_conf.get("ss_id")))
+
 def load_pv(**kwargs):
     dag_run_conf = kwargs["dag_run"].conf
     staging_area = str(dag_run_conf.get("staging_area"))
@@ -54,6 +62,7 @@ def load_pv(**kwargs):
     return None
 
 
+
 extract_task = PythonOperator(
     task_id='extract_pv',
     python_callable=extract_pv,
@@ -65,7 +74,6 @@ spark_transform_task = SparkSubmitOperator(
     task_id='spark_transform_pv',
     conn_id="spark-conn",
     application="jobs/spark_transform_pv.py",
-    provide_context=True,
     dag=dag,
 )
 

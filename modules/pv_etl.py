@@ -4,9 +4,10 @@ from logging import Logger
 from os import makedirs, path, remove
 from shutil import rmtree
 
+import dask.dataframe as dd
 import pandas as pd
 from base_classes import (BUCKET_NAME, METRICS_PREFIX, PV_PREFIX,
-                           BaseExtractor, BaseLoader)
+                          BaseExtractor, BaseLoader)
 from google.cloud import bigquery
 from pyspark.sql import SparkSession, functions
 
@@ -57,7 +58,7 @@ class PVExtract(BaseExtractor):
             self.extract_pv_data(ss_id, date)
 
 
-class PVTransform:
+class PVSparkTransform:
 
     def __init__(self, staging_area: str, logger: Logger):
         self.staging_area = staging_area
@@ -104,9 +105,51 @@ class PVTransform:
         except Exception as error:
             self.logger.error(f"Error while transforming PV data for system {ss_id}: \n{error}")
 
+        return None
+
+class PVDaskTransform:
+
+    def __init__(self, staging_area: str, logger: Logger):
+        self.staging_area = staging_area
+        self.logger = logger
+
+    def transform(self, ss_id: int):
+        """
+            Transforms all the data present in the staging area for ss_id
+        """
+        try:
+            self.logger.info(f"Transforming PV data for System {ss_id}...") 
+
+            metrics_cols = ["system_id", "metric_id", "sensor_name", "raw_units"]
+            metrics_data = dd.read_parquet(path.join(self.staging_area, f"system{ss_id}", f"metrics_system{ss_id}.parquet"))[metrics_cols]
+            filtered_metrics = metrics_data[metrics_data["sensor_name"].isin(["dc_power", "ac_power", "poa_irradiance"])]
+
+            pv_cols = ["measured_on", "metric_id", "value"]
+            pv_data = dd.read_parquet(path.join(self.staging_area, f"system{ss_id}", "pv_data", "*"))[pv_cols]
+
+            merged = dd.merge(pv_data, filtered_metrics, how='inner', left_on="metric_id", right_on="metric_id")
+
+            renames = {
+                    "system_id":"ss_id",
+                    "measured_on":"timestamp",
+                    "sensor_name":"sensor",
+                    "raw_units":"units"
+                }
+            merged = merged.rename(columns=renames)
+
+            selected_cols = ["ss_id", "timestamp", "sensor", "units", "value"]
+            merged = merged[selected_cols]
+            merged = merged.replace("", None)
+
+            merged.to_parquet(path.join(self.staging_area, f"system{ss_id}", "pv_data_merged.parquet"), engine='pyarrow')
+
+            rmtree(path.join(self.staging_area, f"system{ss_id}", "pv_data/"))
+            remove(path.join(self.staging_area, f"system{ss_id}", f"metrics_system{ss_id}.parquet"))
+                   
+        except Exception as error:
+            self.logger.error(f"Error while transforming PV data for system {ss_id}: \n{error}")
 
         return None
-    
 
 class PVLoad(BaseLoader):
 
