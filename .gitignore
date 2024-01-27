@@ -1,6 +1,6 @@
 bq_service_account_key.json
+dag_run.json
 data/
-secrets/
 airflow/logs/
 airflow/plugins/
 assets/

@@ -30,13 +30,12 @@ dag = DAG(
         "end_date":"2010/03/30",
         "staging_area":"staging_area",
         "aws_access_key_id":"AKIA4MTWG33OOIEEML5D",
-        "aws_secret_access_key":"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",
+        "aws_secret_access_key":"its a secret!",
         "region_name":"us-west-2",
         "bq_project_id":"cohere-pv-pipeline",
         "credentials_path":"bq_service_account_key.json"
         }
     )
-
 
 
 def extract_pv(**kwargs):
