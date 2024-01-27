@@ -18,7 +18,9 @@ An ETL pipeline to extract and prepare photovoltaic output data (aka PV data) fo
 (*) see comments section below for justification about using Spark and Airflow.
 
 # Data Schema
-The data has a **star schema**. This is my first time designing my own data schema, so expect incompentency. The data is extracted from the source, processed, joined, and loaded into BigQuery. The resulting database has the following schema.
+The data has a **star schema**. This is my first time designing my own data schema, so expect incompentency.
+
+The data is extracted from the source, processed, joined, and loaded into BigQuery. The resulting database has the following schema.
 
 ### Facts Table
 In the center is a facts table containing time series data. Each row contains:
