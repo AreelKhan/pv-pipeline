@@ -22,44 +22,38 @@ The data has a **star schema**. This is my first time designing my own data sche
 
 ### Facts Table
 In the center is a facts table containing time series data. Each row contains:
-- `timestamp`: when the data was collected
-- `ss_id`: solar system ID
-- `metric_id`: ID of metric measured
-- `value`: value of metric
+| Name        | Description |
+| ----------- | ----------- |
+| `ss_id`     | Solar system ID |
+| `timestamp` | When value is measure |
+| `sensor`    | sensor name |
+| `units`     | unit of measurement |
+| `value`     | measured value in units |
 
-`timestamp`, `system_id` and `metric_id` form a primary key.
+`timestamp`, `system_id` and `sensor` form a primary key.
 
 ### Dim1: System Metadata
 The first dimension table contains metadata about each site. Some but not all columns:
-- `ss_id`: solar system ID (primary key)
-- `latitude`: decimal latitude geo location
-- `longitude`: decimal longitude geo location
-- `elevation`: distance in meters above sea level, nullable
-- `av_pressure`: average annual atmospheric pressure at site in psi
-- `av_temp`: average ambient temperature in degrees Celsius at site
-- `climate_type`: The Koppen-Geiger classifier for the site location
-- `mount_azimuth`: azimuth angle of mount point in degrees
-- `mount_tilt`: tilt angle of mount pointing in degrees
+| Name        | Description |
+| ----------- | ----------- |
+|`ss_id`| solar system ID (primary key)|
+|`latitude`| decimal latitude geo location|
+|`longitude`| decimal longitude geo location|
+|`elevation`| distance in meters above sea level, nullable|
+|`av_pressure`| average annual atmospheric pressure at site in psi|
+|`av_temp`| average ambient temperature in degrees Celsius at site|
+|`climate_type`| The Koppen-Geiger classifier for the site location|
+|`mount_azimuth`| azimuth angle of mount point in degrees|
+|`mount_tilt`| tilt angle of mount pointing in degrees|
 
 This data is static.
-
-### Dim2: Metrics Metadata
-The second dimension table contains metadata about metrics. Each system uniquely gathers and identifies metrics (DC power, solar irradiance, module temperature, etc), and hence the metrics metadata is needed to identify metrics for each system. The columns of this table are:
-- `ss_id`: associated solar system ID
-- `metric_id`: primary key of the metric
-- `common_name`: a general grouping of sensor types (e.g. DC voltage, AC energy, POA irradiance)
-- `raw_units`: raw unscaled or uncalibrated units of the values produced by the sensor
-
-This data is static.
-
-`ss_id` and `metrics_id` form a primary key.
 
 # Comments
 ### Was Airflow a good choice?
-Not really. Since this pipeline does not run on a schedule and does not have complex dependencies between tasks, manual execution would suffice. However, I now have infrastructure to easily add more tasks with dependencies. I can also easily monitor task statuses through the Airflow Web UI. It was also fun using Airflow.
+Not really. Since this pipeline does not run on a schedule and does not have complex dependencies between tasks, manual execution would suffice. But it was fun using Airflow.
 
 ### Was Spark a good choice?
-I do not know. This was my first time using Spark and I am still understanding its use case. The power of Spark is in parallel processing across multiple nodes. Without access to a multi-node machine or the bugdet to run multiple machines in the cloud I am not truly leveraging Spark. Running Dask on my PC would have been simpler and cheaper. But I am using PySpark as a learning exercise.
+I do not know. This was my first time using Spark and I am still understanding its use case. The power of Spark is in parallel processing across multiple nodes. Without access to a multi-node machine or the bugdet to run multiple machines in the cloud I am not truly leveraging Spark. Running Dask on my PC is simpler and cheaper. But I am using PySpark as a learning exercise.
 
 ### Was BigQuery a good choice?
 Again, not sure. Our use case for a database is for analytics, and the data is around 500 GB, so BQ seemed approriate. Ideally I would have the budget to store and analyze the full dataset. But I don't. I will have to analyze this data locally using SparkSQL or Dask. I used BigQuery as a learning exercise.
@@ -90,3 +84,5 @@ Again, not sure. Our use case for a database is for analytics, and the data is a
 I copied plenty of code and text form the following sources:
 - [Setting up Airflow with Docker on Windows.](https://medium.com/@garc1a0scar/how-to-start-with-apache-airflow-in-docker-windows-902674ad1bbe)
 - [openEDI data documentation](https://github.com/openEDI/documentation/blob/main/pvdaq.md)
+- [Writing Docker Compose Files](https://www.techrepublic.com/article/how-to-build-a-docker-compose-file/)
+- [Spark with Airflow](https://github.com/airscholar/SparkingFlow)
