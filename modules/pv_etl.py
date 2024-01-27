@@ -5,7 +5,7 @@ from os import makedirs, path, remove
 from shutil import rmtree
 
 import pandas as pd
-from base_pipeline import (BUCKET_NAME, METRICS_PREFIX, PV_PREFIX,
+from base_classes import (BUCKET_NAME, METRICS_PREFIX, PV_PREFIX,
                            BaseExtractor, BaseLoader)
 from google.cloud import bigquery
 from pyspark.sql import SparkSession, functions

@@ -6,6 +6,7 @@ from pv_pipeline import PVExtract, PVTransform, PVLoad
 from datetime import datetime
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
+from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from os import path
 
 
@@ -40,15 +41,6 @@ def extract_pv(**kwargs):
     )
     return None
 
-def transform_pv(**kwargs):
-    dag_run_conf = kwargs["dag_run"].conf
-    transformer = PVTransform(
-        staging_area=str(dag_run_conf.get("staging_area")),
-        logger=logging.getLogger(__name__)
-    )
-    transformer.transform(int(dag_run_conf.get("ss_id")))
-    return None
-
 def load_pv(**kwargs):
     dag_run_conf = kwargs["dag_run"].conf
     staging_area = str(dag_run_conf.get("staging_area"))
@@ -61,26 +53,28 @@ def load_pv(**kwargs):
     loader.load()
     return None
 
+
 extract_task = PythonOperator(
-    task_id='extract_metadata',
+    task_id='extract_pv',
     python_callable=extract_pv,
     provide_context=True,
     dag=dag,
 )
 
-transform_task = PythonOperator(
-    task_id='transform_metadata',
-    python_callable=transform_pv,
+spark_transform_task = SparkSubmitOperator(
+    task_id='spark_transform_pv',
+    conn_id="spark-conn",
+    application="jobs/spark_transform_pv.py",
     provide_context=True,
     dag=dag,
 )
 
 load_task = PythonOperator(
-    task_id='load_metadata',
+    task_id='load_pv',
     python_callable=load_pv,
     provide_context=True,
     dag=dag,
 )
 
 
-extract_task >> transform_task >> load_task
+extract_task >> spark_transform_task >> load_task
