@@ -1,4 +1,4 @@
-# pv-pipeline
+# Cohere ETL pv-pipeline mini project
 
 # What is it?
 An ETL pipeline to extract and prepare photovoltaic output data (aka PV data) for ML model training and data analysis. The data is from the [Open Energy Data Initiative](https://data.openei.org/submissions/4568).
