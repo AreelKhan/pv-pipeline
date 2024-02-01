@@ -52,8 +52,8 @@ The first dimension table contains metadata about each site. Some but not all co
 
 # How to run pipeline.
 There are two pipelines:
-`pv-metadata-pipeline`: generates the metadata dimension table.
-`pv-spark-pipeline` and `pv-dask-pipeline`: both generate the facts tables, except one uses Spark while the other uses Dask.
+- `pv-metadata-pipeline`: generates the metadata dimension table.
+- `pv-spark-pipeline` and `pv-dask-pipeline`: both generate the facts tables, except one uses Spark while the other uses Dask.
 
 At the moment these pipelines are unscheduled and can be manually executed from the airflow UI or CLI.
 
@@ -64,10 +64,10 @@ You must provide a DAG config (a JSON object) to the pipeline at run time. It wi
 Not really. Since this pipeline does not run on a schedule and does not have complex dependencies between tasks, manual execution would suffice. But it was fun using Airflow.
 
 ### Was Spark a good choice?
-I do not know. This was my first time using Spark and I am still understanding its use case. The power of Spark is in parallel processing across multiple nodes. Without access to a multi-node machine or the bugdet to run multiple machines in the cloud I am not truly leveraging Spark. Running Dask on my PC is simpler and cheaper. But I am using PySpark as a learning exercise.
+I do not know. This was my first time using Spark so I am still understanding its use case. The power of Spark is in parallel processing across multiple nodes, that's not something I did. I feel running Dask was a lot simpler. I used PySpark as a learning exercise.
 
 ### Was BigQuery a good choice?
-I think so. My use case for a database is for analytics, and the data is around 500 GB, so BQ seemed approriate. Ideally I would have the budget to store and analyze the full dataset. But I don't. I will have to analyze this data locally using SparkSQL or Dask. I used BigQuery as a learning exercise.
+I think so. Since I need a database for analytics, and the data is around 500 GB, BQ seemed approriate. Ideally I would have the budget to store and analyze the full dataset. But I don't. I will have to analyze this data locally using SparkSQL or Dask. I used BigQuery as a learning exercise.
 
 ### I learned how to:
 - extract data from an S3 bucket using boto3
